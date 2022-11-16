@@ -1,13 +1,33 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../contexts/AuthProvider';
 
 const Login = () => {
     const { register, handleSubmit, formState: { errors } } = useForm();
-    const [data, setData] = useState("");
-    const handleLogin = data => {
-        console.log(data)
-    }
+    // const [data, setData] = useState("");
+    const { signIn } = useContext(AuthContext)
+
+    const [loginError,setLoginError] = useState('');
+    const location= useLocation();
+    const navigate= useNavigate();
+
+    const from = location.state?.from?.pathname || '/'
+
+        const handleLogin = data => {
+            console.log('data',data);
+            setLoginError('');
+            signIn(data.email,data.password)
+            .then(result=>{
+                const user =result.user;
+                console.log('user',user);
+                navigate(from,{replace: true})
+            })
+            .catch(e=> {
+                console.log(e.message);
+                setLoginError(e.message)
+            });
+        }
     return (
 
         <div className='h-[800px] flex justify-center items-center'>
@@ -32,11 +52,11 @@ const Login = () => {
                         </label>
                         <input {...register("password", {
                             required: "Password is Required",
-                            minLength: {value : 6,message: 'Password must be 6charecters or longer'},
+                            minLength: { value: 6, message: 'Password must be 6charecters or longer' },
 
                         })} className="input input-bordered w-full max-w-xs" type="password" placeholder="password" />
-                         {errors.password && <p className='text-red-600'> {errors.password.message}</p>}
-                   
+                        {errors.password && <p className='text-red-600'> {errors.password.message}</p>}
+
                     </div>
 
                     <label className="label">
@@ -44,6 +64,10 @@ const Login = () => {
                     </label>
 
                     <input className='btn btn-accent w-full' value="Login" type="submit" />
+                
+                        <div>
+                            {loginError && <p>{loginError}</p>}
+                        </div>
                 </form>
 
                 <p>New to Dr Online <Link to="/signup" className='text-primary'> Create a new account</Link></p>
