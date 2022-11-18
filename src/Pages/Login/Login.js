@@ -2,32 +2,40 @@ import React, { useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthProvider';
+import useToken from '../../hooks/useToken';
 
 const Login = () => {
     const { register, handleSubmit, formState: { errors } } = useForm();
     // const [data, setData] = useState("");
     const { signIn } = useContext(AuthContext)
 
-    const [loginError,setLoginError] = useState('');
-    const location= useLocation();
-    const navigate= useNavigate();
+    const [loginError, setLoginError] = useState('');
+    const [loginUserEmail, setLoginUserEmail] = useState('');
+    const [token] = useToken(loginUserEmail);
+
+    const location = useLocation();
+    const navigate = useNavigate();
 
     const from = location.state?.from?.pathname || '/'
 
-        const handleLogin = data => {
-            console.log('data',data);
-            setLoginError('');
-            signIn(data.email,data.password)
-            .then(result=>{
-                const user =result.user;
-                console.log('user',user);
-                navigate(from,{replace: true})
+    if (token) {
+        navigate(from, { replace: true })
+    }
+    const handleLogin = data => {
+        console.log('data', data);
+        setLoginError('');
+        signIn(data.email, data.password)
+            .then(result => {
+                const user = result.user;
+                console.log('user', user);
+                setLoginUserEmail(data.email)
+                // navigate(from,{replace: true})
             })
-            .catch(e=> {
+            .catch(e => {
                 console.log(e.message);
                 setLoginError(e.message)
             });
-        }
+    }
     return (
 
         <div className='h-[800px] flex justify-center items-center'>
@@ -64,10 +72,10 @@ const Login = () => {
                     </label>
 
                     <input className='btn btn-accent w-full' value="Login" type="submit" />
-                
-                        <div>
-                            {loginError && <p>{loginError}</p>}
-                        </div>
+
+                    <div>
+                        {loginError && <p>{loginError}</p>}
+                    </div>
                 </form>
 
                 <p>New to Dr Online <Link to="/signup" className='text-primary'> Create a new account</Link></p>
