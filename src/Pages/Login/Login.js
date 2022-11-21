@@ -22,14 +22,14 @@ const Login = () => {
         navigate(from, { replace: true })
     }
     const handleLogin = data => {
-        console.log('data', data);
+       // console.log('data', data);
         setLoginError('');
         signIn(data.email, data.password)
             .then(result => {
                 const user = result.user;
                 console.log('user', user);
                 setLoginUserEmail(data.email)
-                // navigate(from,{replace: true})
+                 navigate(from,{replace: true})
             })
             .catch(e => {
                 console.log(e.message);
